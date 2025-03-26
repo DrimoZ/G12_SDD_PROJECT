@@ -9,8 +9,6 @@ import be.umons.sdd.models.View360;
 import java.util.List;
 
 public class PaintersViewBuilder {
-
-    
     /**
      * Builds a View360 from the given BSP tree root by applying the painter's algorithm.
      * The painter's algorithm traverses the tree in a depth-first order, but instead of

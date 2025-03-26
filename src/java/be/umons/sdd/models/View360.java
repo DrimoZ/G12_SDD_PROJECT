@@ -28,3 +28,4 @@ public class View360 {
         return "View360" + angularSegments;
     }
 }
+
