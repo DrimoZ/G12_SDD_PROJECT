@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.Optional;
 
 public enum EScenes {
-    ELLIPSESLARGE("Ellispes Large", "/ellipses/ellipsesLarge.txt"),
-    ELLIPSESMEDIUM("Ellispes Medium", "/ellipses/ellipsesMedium.txt"),
-    ELLIPSESSMALL("Ellispes Small", "/ellipses/ellipsesSmall.txt"),
 
     OCTANGLE("Octangle", "/first/octangle.txt"),
     OCTOGONE("Octogone", "/first/octogone.txt"),
+
+    ELLIPSESLARGE("Ellispes Large", "/ellipses/ellipsesLarge.txt"),
+    ELLIPSESMEDIUM("Ellispes Medium", "/ellipses/ellipsesMedium.txt"),
+    ELLIPSESSMALL("Ellispes Small", "/ellipses/ellipsesSmall.txt"),
 
     RANDOMHUGE("Random Huge", "/random/randomHuge.txt"),
     RANDOMLARGE("Random Large", "/random/randomLarge.txt"),
