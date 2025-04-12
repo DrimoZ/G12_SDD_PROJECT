@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class Scene2D {
     private final List<StraightSegment2D> segments;
+    private final String name;
     private final int extentX;
     private final int extentY;
     
@@ -19,8 +20,9 @@ public class Scene2D {
      * @param extentX the extent of the scene in the X direction
      * @param extentY the extent of the scene in the Y direction
      */
-    public Scene2D(List<StraightSegment2D> segments, int extentX, int extentY) {
+    public Scene2D(List<StraightSegment2D> segments, String name, int extentX, int extentY) {
         this.segments = segments;
+        this.name = name;
         this.extentX = extentX;
         this.extentY = extentY;
     }
@@ -32,6 +34,15 @@ public class Scene2D {
      */
     public List<StraightSegment2D> getSegments() {
         return segments;
+    }
+
+    /**
+     * Retrieves the name of the scene.
+     *
+     * @return the name of the scene.
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -63,7 +74,7 @@ public class Scene2D {
         for (StraightSegment2D segment : segments) {
             copy.add(segment.copy());
         }
-        return new Scene2D(copy, extentX, extentY);
+        return new Scene2D(copy, name, extentX, extentY);
     }
 
     @Override
