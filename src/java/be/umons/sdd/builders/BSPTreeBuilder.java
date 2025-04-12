@@ -11,7 +11,7 @@ import java.util.List;
  * Abstract base class for BSP tree builders.
  * It provides common helper methods for candidate evaluation and partitioning.
  */
-public abstract class AbstractBSPTreeBuilder {
+public abstract class BSPTreeBuilder {
 
     protected static final double EPSILON = 1e-6;
     
