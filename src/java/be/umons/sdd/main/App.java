@@ -1,8 +1,7 @@
 package be.umons.sdd.main;
 
+import be.umons.sdd.panels.MainFrame;
 import javax.swing.*;
-
-import be.umons.sdd.main.panels.MainApp;
 
 public class App {
 
@@ -12,6 +11,6 @@ public class App {
      * @param args Command-line arguments passed to the program.
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainApp());
+        SwingUtilities.invokeLater(() -> new MainFrame());
     }
 }
