@@ -1,16 +1,22 @@
-package be.umons.sdd.main.enums;
+package be.umons.sdd.enums;
 
+import be.umons.sdd.builders.BSPTreeBuilder;
+import be.umons.sdd.builders.DeterministicBSPTreeBuilder;
+import be.umons.sdd.builders.RandomBSPTreeBuilder;
+import be.umons.sdd.builders.TellerBSPTreeBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public enum ETreeBuilder {
-    DETERMINISTIC("Deterministic"),
-    RANDOM("Random"),
-    TELLER("Teller");
+    SELECT_BUILDER("Select a Builder", null),
+    DETERMINISTIC("Deterministic", new DeterministicBSPTreeBuilder()),
+    RANDOM("Random", new RandomBSPTreeBuilder()),
+    TELLER("Teller", new TellerBSPTreeBuilder(0.5));
 
 
     private final String displayName;
+    private final BSPTreeBuilder builder;
 
     /**
      * Constructeur de l'énumération.
@@ -18,8 +24,9 @@ public enum ETreeBuilder {
      * @param displayName Le nom affichable de la scène.
      * @param path        Le chemin vers le fichier de configuration de la scène.
      */
-    ETreeBuilder(String displayName) {
+    ETreeBuilder(String displayName, BSPTreeBuilder builder) {
         this.displayName = displayName;
+        this.builder = builder;
     }
 
     /**
@@ -29,6 +36,15 @@ public enum ETreeBuilder {
      */
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * Returns the BSP tree builder associated with this enum constant.
+     *
+     * @return The BSPTreeBuilder instance.
+     */
+    public BSPTreeBuilder getBuilder() {
+        return builder;
     }
 
     /**

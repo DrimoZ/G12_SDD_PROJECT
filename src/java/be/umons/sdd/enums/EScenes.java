@@ -1,10 +1,12 @@
-package be.umons.sdd.main.enums;
+package be.umons.sdd.enums;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public enum EScenes {
+
+    SELECT_SCENE("Select a Scene", null),
 
     OCTANGLE("Octangle", "/first/octangle.txt"),
     OCTOGONE("Octogone", "/first/octogone.txt"),
