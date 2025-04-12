@@ -19,6 +19,14 @@ import java.util.Optional;
 public class SceneSerializer {
     private static final File SCENES_FILE = buildSceneDirectoryPathFromCurrentDir();
 
+    /**
+     * Tries to find the directory containing the scenes (src/ressources/scenes) by walking up the directory
+     * tree from the current directory. The search depth is limited to 5. If the directory is not found, a
+     * RuntimeException is thrown.
+     *
+     * @return The directory containing the scenes, if found.
+     * @throws RuntimeException If the directory is not found within a search depth of 5.
+     */
     private static File buildSceneDirectoryPathFromCurrentDir() {
         try {
             // Get the current directory as a real path
@@ -43,13 +51,44 @@ public class SceneSerializer {
         }
     }
 
-    public static Scene2D readScene(String fileName) throws IOException {
+    /**
+     * Reads a 2D scene from a specified file and returns a Scene2D object.
+     *
+     * This method constructs a File object using the given file name and the 
+     * pre-defined scenes directory path, and then delegates the reading 
+     * operation to another overloaded method.
+     *
+     * @param sceneName the name of the scene to be read.
+     * @param fileName the name of the file containing the scene data.
+     * @return the Scene2D object representing the scene.
+     * @throws IOException if an I/O error occurs during reading.
+     */
+    public static Scene2D readScene(String sceneName, String fileName) throws IOException {
         File sceneFile = new File(SCENES_FILE, fileName);
 
-        return readScene(sceneFile);
+        return readScene(sceneName, sceneFile);
     }
 
-    public static Scene2D readScene(File fileFromRoot) throws IOException {
+    /**
+     * Reads a 2D scene from a specified file and returns a Scene2D object.
+     *
+     * The file is expected to be in the following format:
+     *  - The first line is a header line, containing the extent of the scene in the
+     *    X and Y directions, followed by the number of segments in the scene.
+     *  - Each subsequent line represents a segment, with the following format:
+     *    x1 y1 x2 y2 color
+     *    where (x1, y1) and (x2, y2) are the coordinates of the segment's endpoints,
+     *    and color is the color of the segment, specified by name (e.g. "red", "green", etc.).
+     *
+     * If the file is not found, an IOException is thrown.
+     *
+     * @param sceneName the name of the scene being read.
+     * @param fileFromRoot the file containing the scene data, relative to the
+     *                     directory containing this class.
+     * @return the Scene2D object representing the scene.
+     * @throws IOException if an I/O error occurs during reading.
+     */
+    public static Scene2D readScene(String sceneName, File fileFromRoot) throws IOException {
         if (!fileFromRoot.exists()) {
             throw new IOException("File not found: " + fileFromRoot.getAbsolutePath());
         }
@@ -124,8 +163,6 @@ public class SceneSerializer {
             System.err.println("Warning: Expected " + expectedCount + " segments, but read " + segments.size() + ".");
         }
         
-        return new Scene2D(segments, extentX, extentY);
+        return new Scene2D(segments, sceneName, extentX, extentY);
     }
-
-    
 }
