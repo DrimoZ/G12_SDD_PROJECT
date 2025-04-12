@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Builds a BSP tree using the Teller heuristic.
  */
-public class TellerBSPTreeBuilder extends AbstractBSPTreeBuilder {
+public class TellerBSPTreeBuilder extends BSPTreeBuilder {
 
     private final double tau;  // Threshold for the ratio sigma.
     
@@ -21,6 +21,15 @@ public class TellerBSPTreeBuilder extends AbstractBSPTreeBuilder {
      */
     public TellerBSPTreeBuilder(double tau) {
         this.tau = tau;
+    }
+
+    /**
+     * Returns the threshold value for the ratio sigma used in the Teller heuristic.
+     *
+     * @return the tau value
+     */
+    public double getTau() {
+        return tau;
     }
 
     /**

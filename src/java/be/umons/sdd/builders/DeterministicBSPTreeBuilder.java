@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A deterministic BSP tree builder.
  */
-public class DeterministicBSPTreeBuilder extends AbstractBSPTreeBuilder {
+public class DeterministicBSPTreeBuilder extends BSPTreeBuilder {
 
     /**
      * Builds a deterministic BSP tree from a set of scene objects.

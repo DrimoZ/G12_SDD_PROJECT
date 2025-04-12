@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A BSP tree builder that uses a random permutation of objects before constructing a deterministic BSP tree.
  */
-public class RandomBSPTreeBuilder extends AbstractBSPTreeBuilder {
+public class RandomBSPTreeBuilder extends BSPTreeBuilder {
 
     /**
      * Builds a BSP tree by first randomly shuffling the objects,
