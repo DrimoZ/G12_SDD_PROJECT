@@ -12,6 +12,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
@@ -23,6 +25,8 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
     private Scene2D currentScene;
 
     private boolean drawPartitionLine = false;
+
+    private Point2D cursorScenePosition = null;
 
     /**
      * Returns the single instance of the SceneVisualizerPanel class.
@@ -38,6 +42,7 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
 
     private SceneVisualizerPanel() {
         initUI();
+        initMouseListeners();
     }
 
     private void initUI() {
@@ -47,17 +52,55 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
     }
 
     
+    private void initMouseListeners() {
+        // Update the cursor's scene coordinate whenever the mouse moves.
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (currentScene == null) {
+                    return;
+                }
+                
+                // Panel drawing area (20 pixels margin on each side)
+                int panelWidth = getWidth() - 40;
+                int panelHeight = getHeight() - 40;
+                int centerX = getWidth() / 2;
+                int centerY = getHeight() / 2;
+                
+                // Scene dimensions
+                int sceneWidth = currentScene.getExtentX() * 2;
+                int sceneHeight = currentScene.getExtentY() * 2;
+                
+                // Compute scale factors and use the lower one to maintain aspect ratio.
+                double scaleX = panelWidth / (double) sceneWidth;
+                double scaleY = panelHeight / (double) sceneHeight;
+                if (scaleX < scaleY) {
+                    scaleY = scaleX;
+                } else {
+                    scaleX = scaleY;
+                }
+                
+                // Convert mouse position (panel coordinates) to scene coordinates.
+                double sceneX = (e.getX() - centerX) / scaleX;
+                double sceneY = (centerY - e.getY()) / scaleY;
+                cursorScenePosition = new Point2D(sceneX, sceneY);
+                // Request a repaint to update the marker.
+                repaint();
+            }
+        });
+    }
+
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        System.out.println("SceneVisualizerPanel.paintComponent()");
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         if (currentScene != null && currentNode != null) {
             drawNode(g2, currentNode, drawPartitionLine);
+            drawCursorMarker(g2);
         } else {
             int width = getWidth() - 2 * 20;
             int height = getHeight() - 2 * 20;
@@ -183,6 +226,39 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
         drawNode(g2, node.getRight(), drawPartitionLine);
     }
 
+    private void drawCursorMarker(Graphics2D g2) {
+        if (cursorScenePosition == null || currentScene == null) return;
+        
+        int panelWidth = getWidth() - 40;
+        int panelHeight = getHeight() - 40;
+        int centerX = getWidth() / 2;
+        int centerY = getHeight() / 2;
+        int sceneWidth = currentScene.getExtentX() * 2;
+        int sceneHeight = currentScene.getExtentY() * 2;
+        
+        double scaleX = panelWidth / (double) sceneWidth;
+        double scaleY = panelHeight / (double) sceneHeight;
+        if (scaleX < scaleY) {
+            scaleY = scaleX;
+        } else {
+            scaleX = scaleY;
+        }
+        
+        // Convert scene coordinates to panel coordinates.
+        int cursorX = (int) (centerX + cursorScenePosition.x * scaleX);
+        int cursorY = (int) (centerY - cursorScenePosition.y * scaleY);
+        
+        // Draw a small blue cross at the cursor position.
+        g2.setColor(Color.BLUE);
+        int markerSize = 5;
+        g2.drawLine(cursorX - markerSize, cursorY, cursorX + markerSize, cursorY);
+        g2.drawLine(cursorX, cursorY - markerSize, cursorX, cursorY + markerSize);
+        
+        // Draw the coordinate values next to the marker.
+        String coordText = "(" + String.format("%.1f", cursorScenePosition.x) + ", " 
+                + String.format("%.1f", cursorScenePosition.y) + ")";
+        g2.drawString(coordText, cursorX + 10, cursorY - 10);
+    }
 
     // Observers
     
