@@ -100,8 +100,8 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
      */
     private void drawView360(Graphics2D g2, View360 view) {
         // PREVIEW CONFIGURATION
-        int previewMargin = 50;          // margin from top and left
-        int previewRadius = 300;         // fixed radius for the preview circle
+        int previewMargin = 45;          // margin from top and left
+        int previewRadius = 130;         // fixed radius for the preview circle
         int centerX = previewMargin + previewRadius;
         int centerY = previewMargin + previewRadius;
         
@@ -165,6 +165,13 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
                        previewRadius * 2, previewRadius * 2,
                        (int) segStartDeg, (int) segExtentDeg);
         }
+
+        // DRAW ARC TO SHOW THE WHOLE VIEWING RANGE
+        g2.setColor(Color.LIGHT_GRAY);
+        g2.setStroke(new BasicStroke(2));
+        g2.drawArc(centerX - 20, centerY - 20,
+                    20 * 2, 20 * 2,
+                (int) observerStartAngle + 90, (int) (observerEndAngle  - observerStartAngle));
         
         // DRAW OBSERVER'S VIEWING RANGE AS BLUE RADIAL LINES
         g2.setColor(Color.BLUE);

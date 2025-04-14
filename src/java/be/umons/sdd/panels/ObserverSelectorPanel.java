@@ -1,7 +1,9 @@
 package be.umons.sdd.panels;
 
 import be.umons.sdd.interfaces.ObserverObserver;
+import be.umons.sdd.interfaces.SceneObserver;
 import be.umons.sdd.models.Point2D;
+import be.umons.sdd.models.Scene2D;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
@@ -13,10 +15,11 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-public class ObserverSelectorPanel extends JPanel {
+public class ObserverSelectorPanel extends JPanel implements SceneObserver {
 
     private static ObserverSelectorPanel instance;
 
+    private Scene2D currentScene;
     private final Point2D position = new Point2D(0, 0);
     private double startAngle = 0.0;
     private double endAngle = 360.0;
@@ -88,9 +91,9 @@ public class ObserverSelectorPanel extends JPanel {
         observerAnglePanel.add(label2);
 
         // Create JSpinners for start and end angle.
-        spinnerStartAngle = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 360.0, 1.0));
+        spinnerStartAngle = new JSpinner(new SpinnerNumberModel(0.0, -360.0, 360.0, 1.0));
         spinnerStartAngle.setPreferredSize(new Dimension(80, 20));
-        spinnerEndAngle = new JSpinner(new SpinnerNumberModel(360.0, 0.0, 360.0, 1.0));
+        spinnerEndAngle = new JSpinner(new SpinnerNumberModel(360.0, -360.0, 360.0, 1.0));
         spinnerEndAngle.setPreferredSize(new Dimension(80, 20));
         
         observerAnglePanel.add(spinnerStartAngle);
@@ -107,6 +110,8 @@ public class ObserverSelectorPanel extends JPanel {
      * and notify the registered ObserverObservers.
      */
     private void initActionListeners() {
+        onSceneSelected(SceneSelectorPanel.getInstance().addSceneObserver(this));
+
         spinnerX.addChangeListener(e -> {
             double newX = ((Number) spinnerX.getValue()).doubleValue();
             position.x = newX;
@@ -119,18 +124,44 @@ public class ObserverSelectorPanel extends JPanel {
             notifyObservers();
         });
 
-        spinnerStartAngle.addChangeListener(e -> {
+        spinnerStartAngle.addChangeListener(e -> {            
             startAngle = ((Number) spinnerStartAngle.getValue()).doubleValue();
+
+            // Max Angle diff is 360
+            if (endAngle - startAngle > 360) {
+                endAngle = startAngle + 360;
+                spinnerEndAngle.setValue(endAngle);
+            }
+
             notifyObservers();
         });
 
         spinnerEndAngle.addChangeListener(e -> {
             endAngle = ((Number) spinnerEndAngle.getValue()).doubleValue();
+
+            // Max Angle diff is 360
+            if (endAngle - startAngle > 360) {
+                startAngle = endAngle - 360;
+                spinnerStartAngle.setValue(startAngle);
+            }
+
             notifyObservers();
         });
     }
 
     // Public Observers
+
+    @Override
+    public void onSceneSelected(Scene2D scene) {
+        currentScene = scene;
+
+        if (currentScene != null) {
+            double extentX = currentScene.getExtentX();
+            double extentY = currentScene.getExtentY();
+            spinnerX.setModel(new SpinnerNumberModel(position.x, -extentX, extentX, 1.0));
+            spinnerY.setModel(new SpinnerNumberModel(position.y, -extentY, extentY, 1.0));
+        }
+    }
 
     /**
      * Adds an ObserverObserver to the list of observers.
