@@ -4,8 +4,8 @@ package be.umons.sdd.models;
  * Represents a point in R².
  */
 public class Point2D {
-    public final double x;
-    public final double y;
+    public double x;
+    public double y;
     
     /**
      * Constructs a 2D point.

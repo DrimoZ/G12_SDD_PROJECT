@@ -89,6 +89,4 @@ public class SceneVisulatizerPanel extends JPanel {
             g2.drawString(text, x, y);
         }
     }
-
-
 }

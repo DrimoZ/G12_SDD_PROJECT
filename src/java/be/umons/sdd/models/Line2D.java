@@ -85,6 +85,10 @@ public class Line2D {
 
         return Math.abs(det) >= EPSILON;
     }
+
+    public double getA() { return a; }
+    public double getB() { return b; }
+    public double getC() { return c; }
     
     @Override
     public String toString() {

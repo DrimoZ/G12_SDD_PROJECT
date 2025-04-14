@@ -11,6 +11,6 @@ public class App {
      * @param args Command-line arguments passed to the program.
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame());
+        SwingUtilities.invokeLater(MainFrame::getInstance);
     }
 }

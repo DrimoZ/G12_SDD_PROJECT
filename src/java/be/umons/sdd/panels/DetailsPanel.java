@@ -4,8 +4,10 @@ import be.umons.sdd.builders.BSPTreeBuilder;
 import be.umons.sdd.builders.DeterministicBSPTreeBuilder;
 import be.umons.sdd.builders.RandomBSPTreeBuilder;
 import be.umons.sdd.builders.TellerBSPTreeBuilder;
+import be.umons.sdd.interfaces.ObserverObserver;
 import be.umons.sdd.interfaces.SceneObserver;
 import be.umons.sdd.interfaces.TreeBuilderObserver;
+import be.umons.sdd.models.Point2D;
 import be.umons.sdd.models.Scene2D;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
@@ -13,18 +15,23 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class DetailsPanel extends JPanel implements SceneObserver, TreeBuilderObserver {
+public class DetailsPanel extends JPanel implements SceneObserver, TreeBuilderObserver, ObserverObserver {
 
     private static DetailsPanel instance;
 
     private Scene2D currentScene;
     private BSPTreeBuilder currentBuilder;
+    private Point2D observerPosition;
+    private double observerStartAngle;
+    private double observerEndAngle;
 
     private JPanel selectedScenePanel;
     private JPanel selectedBuilderPanel;
+    private JPanel selectedObserverPanel;
 
     private JLabel sceneTitleLabel, sceneNameLabel, sceneSizeLabel, sceneSegmentCountLabel, noSceneLabel;
     private JLabel builderTitleLabel, builderNameLabel, builderTauValueLabel, noBuilderLabel;
+    private JLabel observerTitleLabel, observerPositionLabel, observerAngleRangeLabel, noObserverLabel;
 
     /**
      * Returns the single instance of the DetailsPanel class.
@@ -55,13 +62,17 @@ public class DetailsPanel extends JPanel implements SceneObserver, TreeBuilderOb
         // Main panel settings
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createTitledBorder("Current Selection"));
-        setPreferredSize(new Dimension(300, 500));
+
+        // Only set width, height should be determined by content
+        setPreferredSize(new Dimension(300, 250));
 
         createSelectedScenePanel();
         createSelectedBuilderPanel();
+        createSelectedObserverPanel();
 
         add(selectedScenePanel);
         add(selectedBuilderPanel);
+        add(selectedObserverPanel);
     }
 
     /**
@@ -75,6 +86,7 @@ public class DetailsPanel extends JPanel implements SceneObserver, TreeBuilderOb
     private void initObservers() {
         onSceneSelected(SceneSelectorPanel.getInstance().addSceneObserver(this));
         onTreeBuilderSelected(TreeBuilderSelectorPanel.getInstance().addTreeBuilderObserver(this));
+        ObserverSelectorPanel.getInstance().addObserver(this);
     }
 
     /**
@@ -120,6 +132,28 @@ public class DetailsPanel extends JPanel implements SceneObserver, TreeBuilderOb
         builderNameLabel = new JLabel();
         builderTauValueLabel = new JLabel();
         noBuilderLabel = new JLabel(" - No builder selected.");
+    }
+    
+    /**
+     * Creates the panel that displays information about the currently selected observer.
+     * <p>
+     * This method initializes the panel with a title label and creates labels for the
+     * observer's position and angle range (if applicable for the selected observer). It also
+     * adds a label that appears when no observer is selected.
+     */
+    private void createSelectedObserverPanel() {
+        selectedObserverPanel = new JPanel();
+        selectedObserverPanel.setLayout(new BoxLayout(selectedObserverPanel, BoxLayout.Y_AXIS));
+        selectedObserverPanel.setBorder(BorderFactory.createEmptyBorder(15, 10, 0, 0));
+
+        observerTitleLabel = new JLabel("Observer Information:");
+        observerTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+        selectedObserverPanel.add(observerTitleLabel);
+
+        // Initialize observer labels.
+        observerPositionLabel = new JLabel();
+        observerAngleRangeLabel = new JLabel();
+        noObserverLabel = new JLabel(" - No observer selected.");
     }
 
     // Observers
@@ -194,5 +228,36 @@ public class DetailsPanel extends JPanel implements SceneObserver, TreeBuilderOb
         // Refresh the UI
         selectedBuilderPanel.revalidate();
         selectedBuilderPanel.repaint();
+    }
+
+    /**
+     * Updates the observer details.
+     *
+     * @param pos the selected position.
+     * @param startAngle the start angle.
+     * @param endAngle the end angle.
+     */
+    @Override
+    public void onObserverSelected(Point2D pos, double startAngle, double endAngle) {
+        observerPosition = pos;
+        observerStartAngle = startAngle;
+        observerEndAngle = endAngle;
+
+        // Update labels accordingly
+        selectedObserverPanel.removeAll();
+        selectedObserverPanel.add(observerTitleLabel);
+
+        if (observerPosition != null) {
+            observerPositionLabel.setText(" - Position: (" + observerPosition.x + ", " + observerPosition.y + ")");
+            observerAngleRangeLabel.setText(" - Angle: " + observerStartAngle + "° to " + observerEndAngle + "°");
+            selectedObserverPanel.add(observerPositionLabel);
+            selectedObserverPanel.add(observerAngleRangeLabel);
+        } else {
+            selectedObserverPanel.add(noObserverLabel);
+        }
+
+        // Refresh the UI
+        selectedObserverPanel.revalidate();
+        selectedObserverPanel.repaint();
     }
 }
