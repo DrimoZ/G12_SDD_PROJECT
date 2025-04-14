@@ -126,7 +126,7 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
         int sceneWidth = currentScene.getExtentX() * 2;
         int sceneHeight = currentScene.getExtentY() * 2;
 
-        // Panel size (with an assumed 20 pixels margin)
+        // Panel size
         int panelWidth = getWidth() - 2 * 20;
         int panelHeight = getHeight() - 2 * 20;
 
@@ -265,6 +265,7 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
     @Override
     public void onBSPUpdated(BSPNode node) {
         currentNode = node;
+        repaint();
     }
 
     public void setScene(Scene2D scene) {

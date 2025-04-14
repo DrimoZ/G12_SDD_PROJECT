@@ -65,7 +65,7 @@ public class MainFrame extends JFrame implements SceneObserver, TreeBuilderObser
     private void initUI() {
         setTitle("BSP Tree Builder");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 800);
+        setSize(1920,960);
         setLocationRelativeTo(null);
         setVisible(true);
 
@@ -167,6 +167,7 @@ public class MainFrame extends JFrame implements SceneObserver, TreeBuilderObser
         }
         sceneVisualizerPanel.setScene(currentScene);
         sceneVisualizerPanel.onBSPUpdated(currentBspTree);
+        painterVisualizerPanel.onBSPUpdated(currentBspTree);
     }
 
     @Override

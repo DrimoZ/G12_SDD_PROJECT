@@ -144,15 +144,16 @@ public class PaintersViewBuilder {
         // Normalize angles to [0, 2π)
         angle1 = (angle1 < 0) ? angle1 + 2 * Math.PI : angle1;
         angle2 = (angle2 < 0) ? angle2 + 2 * Math.PI : angle2;
+
         
         // Determine start and end of the interval
         double startAngle = angle1;
         double endAngle = angle2;
         
-        // If the segment crosses the 0° cut (e.g., one angle is near 0 and the other near 2π)
-        // adjust the interval by adding 2π to the smaller angle
         if (angle2 < angle1) {
-            endAngle = angle2 + 2 * Math.PI;
+            if (angle2 == 0) {
+                endAngle = 2 * Math.PI;
+            }
         }
         
         return new AngularSegment(startAngle, endAngle, segmentToProject);

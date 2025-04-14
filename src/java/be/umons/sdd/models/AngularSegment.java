@@ -30,6 +30,6 @@ public class AngularSegment {
     @Override
     public String toString() {
         // Convert to degrees for readability.
-        return "AngularSegment[" + Math.toDegrees(startAngle) + "°, " + Math.toDegrees(endAngle) + "°] - " + segment;
+        return "AngularSegment[" + startAngle + " (" + Math.toDegrees(startAngle) + "°), " + endAngle + " (" + Math.toDegrees(endAngle) + "°)]";
     }
 }

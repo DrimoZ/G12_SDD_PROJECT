@@ -1,28 +1,32 @@
 package be.umons.sdd.panels;
 
+import be.umons.sdd.builders.PaintersViewBuilder;
 import be.umons.sdd.interfaces.BSPNodeObserver;
+import be.umons.sdd.interfaces.ObserverObserver;
+import be.umons.sdd.models.AngularSegment;
 import be.umons.sdd.models.BSPNode;
-import be.umons.sdd.models.Line2D;
 import be.umons.sdd.models.Point2D;
-import be.umons.sdd.models.Scene2D;
-import be.umons.sdd.models.StraightSegment2D;
+import be.umons.sdd.models.View360;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver {
+public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, ObserverObserver {
     
     private static PaintersVisualizerPanel instance;
 
     private BSPNode currentNode;
-    private Scene2D currentScene;
+    private Point2D observerPosition;
+    private double observerStartAngle;
+    private double observerEndAngle;
 
-    private boolean drawPartitionLine = false;
 
     /**
      * Returns the single instance of the SceneVisualizerPanel class.
@@ -38,26 +42,33 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver {
 
     private PaintersVisualizerPanel() {
         initUI();
+        initObservers();
     }
 
     private void initUI() {
         setPreferredSize(new Dimension(900, 740));
         setBackground(Color.WHITE);
-        setBorder(BorderFactory.createTitledBorder("Scene Visualization"));
+        setBorder(BorderFactory.createTitledBorder("Painter's Visualizer"));
     }
 
-    
+    private void initObservers() {
+        ObserverSelectorPanel.getInstance().addObserver(this);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        System.out.println("SceneVisualizerPanel.paintComponent()");
-
+        
+        // Setup rendering hints.
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        if (currentScene != null && currentNode != null) {
-            drawNode(g2, currentNode, drawPartitionLine);
+        
+        // Check if we have the BSP node and a valid observer position.
+        if (currentNode != null && observerPosition != null) {
+            // Compute the 360° view using the Painters algorithm.
+            View360 view = PaintersViewBuilder.paintersAlgorithm(currentNode, observerPosition);
+            // Draw the result.
+            drawView360(g2, view);
         } else {
             int width = getWidth() - 2 * 20;
             int height = getHeight() - 2 * 20;
@@ -67,7 +78,7 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver {
             g2.setColor(Color.DARK_GRAY);
             g2.drawRect(20, 20, width, height);
 
-            String text = "Please load a scene before visualizing it.";
+            String text = "No painter view available (BSP tree or observer missing).";
             FontMetrics fm = g2.getFontMetrics();
             int textWidth = fm.stringWidth(text);
             int textHeight = fm.getAscent();
@@ -77,123 +88,114 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver {
             g2.drawString(text, x, y);
         }
     }
+    
+    /**
+     * Draws the computed 360° view as a small preview in the top-left corner.
+     * The preview shows the circle outline, colored segments drawn only on the circle line,
+     * degree markers (with 0° matching the top, which is where a blue radial line is drawn),
+     * and blue radial lines for the observer's viewing range.
+     *
+     * @param g2 The Graphics2D context.
+     * @param view The View360 result from the Painter's algorithm.
+     */
+    private void drawView360(Graphics2D g2, View360 view) {
+        // PREVIEW CONFIGURATION
+        int previewMargin = 50;          // margin from top and left
+        int previewRadius = 300;         // fixed radius for the preview circle
+        int centerX = previewMargin + previewRadius;
+        int centerY = previewMargin + previewRadius;
+        
+        // DRAW DEGREE MARKERS
+        g2.setFont(g2.getFont().deriveFont(10f));
+        FontMetrics fm = g2.getFontMetrics();
 
-    private void drawNode(Graphics2D g2, BSPNode node, boolean drawPartitionLine) {
-        // Recursively draw the BSP tree (draw the coplanar segments first)
-        int sceneWidth = currentScene.getExtentX() * 2;
-        int sceneHeight = currentScene.getExtentY() * 2;
+        // For 0° at the top, shift by +90 degrees.
+        for (int deg = 0; deg < 360; deg += 30) {
+            double rad = Math.toRadians(deg + 90);  // so that deg=0 appears at top
 
-        // Panel size (with an assumed 20 pixels margin)
-        int panelWidth = getWidth() - 2 * 20;
-        int panelHeight = getHeight() - 2 * 20;
+            int xMarker = centerX + (int)(previewRadius * Math.cos(rad));
+            int yMarker = centerY - (int)(previewRadius * Math.sin(rad));
+            int labelX = centerX + (int)((previewRadius + 15) * Math.cos(rad)) ;
+            int labelY = centerY - (int)((previewRadius + 15) * Math.sin(rad));
 
-        // Scale factor
-        double scaleX = ((double) panelWidth) / sceneWidth;
-        double scaleY = ((double) panelHeight) / sceneHeight;
-        // Use the lowest scale factor to make the whole scene visible
-        if (scaleX < scaleY) {
-            scaleY = scaleX;
-        } else {
-            scaleX = scaleY;
+            String label = deg + "°";
+            int labelWidth = fm.stringWidth(label);
+            int labelHeight = fm.getAscent();
+
+            g2.setColor(Color.BLACK);
+            g2.drawString(label, labelX - labelWidth / 2, labelY + labelHeight / 2);
+
+            // Draw a small tick mark.
+            int tickLength = 4;
+            int xTickStart = centerX + (int)((previewRadius - tickLength) * Math.cos(rad));
+            int yTickStart = centerY - (int)((previewRadius - tickLength) * Math.sin(rad));
+            g2.drawLine(xTickStart, yTickStart, xMarker, yMarker);
         }
+        
+        // DRAW COLORED SEGMENTS ONLY ON THE CIRCLE LINE
+        List<AngularSegment> angularSegments = view.getAngularSegments();
 
-        // Center of panel
-        int centerX = getWidth() / 2;
-        int centerY = getHeight() / 2;
+        // For each segment, compute its start and extent in degrees.
+        // Assume AngularSegment angles are in radians with 0 at east.
+        // Convert them to degrees with 0 at top: (deg = Math.toDegrees(angle) - 90)
+        for (AngularSegment as : angularSegments) {
+            double segStartDeg = Math.toDegrees(as.getStartAngle());
+            double segEndDeg = Math.toDegrees(as.getEndAngle());
+            
 
-        // Draw all segments
-        for (StraightSegment2D segment : node.getCoplanarObjects()) {
-            int x1 = (int) (centerX + segment.getStart().x * scaleX);
-            int y1 = (int) (centerY - segment.getStart().y * scaleY);
-            int x2 = (int) (centerX + segment.getEnd().x * scaleX);
-            int y2 = (int) (centerY - segment.getEnd().y * scaleY);
+            double segExtentDeg = segEndDeg - segStartDeg;
 
-            g2.setColor(segment.getColor());
-            g2.drawLine(x1, y1, x2, y2);
+            // Handle wrap-around if needed.
+            if (segExtentDeg < 0) {
+                segExtentDeg += 360;
+            }
+
+            
+            g2.setColor(Color.white);
+            g2.setStroke(new BasicStroke(6));  // thick stroke on the circle line
+            g2.drawArc(centerX - previewRadius, centerY - previewRadius,
+                       previewRadius * 2, previewRadius * 2,
+                       (int) segStartDeg, (int) segExtentDeg);
+
+            // Draw the arc along the circle with the actual segment color.
+            Color segmentColor = as.getSegment().getColor();
+            g2.setColor(segmentColor);
+            g2.setStroke(new BasicStroke(2));  // thick stroke on the circle line
+            g2.drawArc(centerX - previewRadius, centerY - previewRadius,
+                       previewRadius * 2, previewRadius * 2,
+                       (int) segStartDeg, (int) segExtentDeg);
         }
-
-        // Draw the partition line if applicable.
-        if (node.getPartition() != null && drawPartitionLine) {
-            Line2D partitionLine = node.getPartition();
-
-            // Define the scene bounding box (scene coordinates)
-            double xmin = -currentScene.getExtentX();
-            double xmax = currentScene.getExtentX();
-            double ymin = -currentScene.getExtentY();
-            double ymax = currentScene.getExtentY();
-
-            // Use a small epsilon to avoid division by zero issues.
-            final double EPSILON = 1e-6;
-
-            // Store intersection points.
-            java.util.List<Point2D> intersections = new java.util.ArrayList<>();
-
-            // Intersect with left border: x = xmin.
-            if (Math.abs(partitionLine.getB()) > EPSILON) {
-                double y = -(partitionLine.getA() * xmin + partitionLine.getC()) / partitionLine.getB();
-                if (y >= ymin && y <= ymax) {
-                    intersections.add(new Point2D(xmin, y));
-                }
-            }
-            // Intersect with right border: x = xmax.
-            if (Math.abs(partitionLine.getB()) > EPSILON) {
-                double y = -(partitionLine.getA() * xmax + partitionLine.getC()) / partitionLine.getB();
-                if (y >= ymin && y <= ymax) {
-                    intersections.add(new Point2D(xmax, y));
-                }
-            }
-            // Intersect with bottom border: y = ymin.
-            if (Math.abs(partitionLine.getA()) > EPSILON) {
-                double x = -(partitionLine.getB() * ymin + partitionLine.getC()) / partitionLine.getA();
-                if (x >= xmin && x <= xmax) {
-                    intersections.add(new Point2D(x, ymin));
-                }
-            }
-            // Intersect with top border: y = ymax.
-            if (Math.abs(partitionLine.getA()) > EPSILON) {
-                double x = -(partitionLine.getB() * ymax + partitionLine.getC()) / partitionLine.getA();
-                if (x >= xmin && x <= xmax) {
-                    intersections.add(new Point2D(x, ymax));
-                }
-            }
-
-            // Remove duplicate or very-close points (if necessary)
-            if (intersections.size() >= 2) {
-                // In most cases two distinct intersection points should be found.
-                Point2D p1 = intersections.get(0);
-                Point2D p2 = intersections.get(1);
-
-                // Transform scene coordinates to panel coordinates.
-                int x1 = (int) (centerX + p1.x * scaleX);
-                int y1 = (int) (centerY - p1.y * scaleY);
-                int x2 = (int) (centerX + p2.x * scaleX);
-                int y2 = (int) (centerY - p2.y * scaleY);
-
-                // Set a distinct color for partition lines.
-                g2.setColor(Color.RED);
-                g2.drawLine(x1, y1, x2, y2);
-            }
-        }
-
-        if (node.isLeaf()) {
-            return;
-        }
-
-        drawNode(g2, node.getLeft(), drawPartitionLine);
-        drawNode(g2, node.getRight(), drawPartitionLine);
+        
+        // DRAW OBSERVER'S VIEWING RANGE AS BLUE RADIAL LINES
+        g2.setColor(Color.BLUE);
+        g2.setStroke(new BasicStroke(2));
+        int lineLength = previewRadius;
+        // When observerStartAngle is 0, the blue line should be at the top.
+        int xStart = centerX + (int)(lineLength * Math.cos(Math.toRadians(observerStartAngle + 90)));
+        int yStart = centerY - (int)(lineLength * Math.sin(Math.toRadians(observerStartAngle + 90)));
+        int xEnd = centerX + (int)(lineLength * Math.cos(Math.toRadians(observerEndAngle + 90)));
+        int yEnd = centerY - (int)(lineLength * Math.sin(Math.toRadians(observerEndAngle + 90)));
+        g2.drawLine(centerX, centerY, xStart, yStart);
+        g2.drawLine(centerX, centerY, xEnd, yEnd);
     }
-
 
     // Observers
     
     @Override
     public void onBSPUpdated(BSPNode node) {
         currentNode = node;
-    }
 
-    public void setScene(Scene2D scene) {
-        currentScene = scene;
+        revalidate();
         repaint();
     }
 
+    @Override
+    public void onObserverSelected(Point2D pos, double startAngle, double endAngle) {
+        observerPosition = pos;
+        observerStartAngle = startAngle;
+        observerEndAngle = endAngle;
+
+        revalidate();
+        repaint();
+    }
 }

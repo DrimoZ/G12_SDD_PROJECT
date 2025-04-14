@@ -88,9 +88,9 @@ public class ObserverSelectorPanel extends JPanel {
         observerAnglePanel.add(label2);
 
         // Create JSpinners for start and end angle.
-        spinnerStartAngle = new JSpinner(new SpinnerNumberModel(0.0, -360.0, 360.0, 1.0));
+        spinnerStartAngle = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 360.0, 1.0));
         spinnerStartAngle.setPreferredSize(new Dimension(80, 20));
-        spinnerEndAngle = new JSpinner(new SpinnerNumberModel(360.0, -360.0, 360.0, 1.0));
+        spinnerEndAngle = new JSpinner(new SpinnerNumberModel(360.0, 0.0, 360.0, 1.0));
         spinnerEndAngle.setPreferredSize(new Dimension(80, 20));
         
         observerAnglePanel.add(spinnerStartAngle);
