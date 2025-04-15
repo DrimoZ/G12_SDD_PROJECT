@@ -1,5 +1,7 @@
 package be.umons.sdd.models;
 
+import be.umons.sdd.utils.ColorParser;
+
 /**
  * Represents a fragment (here, a StraightSegment2D) as seen from the observer,
  * projected onto the 360° view. The angular interval is expressed in radians.
@@ -30,6 +32,6 @@ public class AngularSegment {
     @Override
     public String toString() {
         // Convert to degrees for readability.
-        return "AngularSegment[" + startAngle + " (" + Math.toDegrees(startAngle) + "°), " + endAngle + " (" + Math.toDegrees(endAngle) + "°)]";
+        return "AngularSegment[" + startAngle + " (" + Math.toDegrees(startAngle) + "°), " + endAngle + " (" + Math.toDegrees(endAngle) + "°), " + ColorParser.getColorName(segment.getColor()) + "]";
     }
 }
