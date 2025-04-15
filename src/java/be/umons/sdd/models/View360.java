@@ -71,6 +71,10 @@ public class View360 {
     public List<AngularSegment> getAngularSegments() {
         System.out.println(angularSegments.size());
 
+        for (AngularSegment as : angularSegments) {
+            System.out.println(as.toString());
+        }
+
         return angularSegments;
     }
     
