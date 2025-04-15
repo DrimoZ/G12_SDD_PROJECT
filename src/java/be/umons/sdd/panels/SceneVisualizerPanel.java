@@ -1,6 +1,7 @@
 package be.umons.sdd.panels;
 
 import be.umons.sdd.interfaces.BSPNodeObserver;
+import be.umons.sdd.interfaces.ObserverObserver;
 import be.umons.sdd.models.BSPNode;
 import be.umons.sdd.models.Line2D;
 import be.umons.sdd.models.Point2D;
@@ -17,12 +18,15 @@ import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
+public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver, ObserverObserver {
     
     private static SceneVisualizerPanel instance;
 
     private BSPNode currentNode;
     private Scene2D currentScene;
+    private Point2D observerPosition;
+    private double observerStartAngle;
+    private double observerEndAngle;
 
     private boolean drawPartitionLine = false;
 
@@ -43,6 +47,7 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
     private SceneVisualizerPanel() {
         initUI();
         initMouseListeners();
+        initObservers();
     }
 
     private void initUI() {
@@ -51,6 +56,9 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
         setBorder(BorderFactory.createTitledBorder("Scene Visualization"));
     }
 
+    private void initObservers() {
+        ObserverSelectorPanel.getInstance().addObserver(this);
+    }
     
     private void initMouseListeners() {
         // Update the cursor's scene coordinate whenever the mouse moves.
@@ -89,7 +97,6 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
             }
         });
     }
-
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -100,7 +107,9 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
 
         if (currentScene != null && currentNode != null) {
             drawNode(g2, currentNode, drawPartitionLine);
+            drawObserver(g2);
             drawCursorMarker(g2);
+
         } else {
             int width = getWidth() - 2 * 20;
             int height = getHeight() - 2 * 20;
@@ -118,6 +127,29 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
             int y = 20 + (height + textHeight) / 2;
 
             g2.drawString(text, x, y);
+        }
+    }
+
+    private void drawObserver(Graphics2D g2) {
+        if (observerPosition != null) {
+            int width = getWidth() - 2 * 20;
+            int height = getHeight() - 2 * 20;
+            int centerX = getWidth() / 2;
+            int centerY = getHeight() / 2;
+
+            double scaleX = ((double) width) / (currentScene.getExtentX() * 2);
+            double scaleY = ((double) height) / (currentScene.getExtentY() * 2);
+            if (scaleX < scaleY) {
+                scaleY = scaleX;
+            } else {    
+                scaleX = scaleY;
+            }
+
+            int x = (int) (centerX + observerPosition.x * scaleX);
+            int y = (int) (centerY - observerPosition.y * scaleY);
+
+            g2.setColor(Color.RED);
+            g2.fillOval(x - 5, y - 5, 10, 10);
         }
     }
 
@@ -261,6 +293,15 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver {
     }
 
     // Observers
+
+    @Override
+    public void onObserverSelected(Point2D position, double startAngle, double endAngle) {
+        observerPosition = position;
+        observerStartAngle = startAngle;
+        observerEndAngle = endAngle;
+
+        repaint();
+    }
     
     @Override
     public void onBSPUpdated(BSPNode node) {
