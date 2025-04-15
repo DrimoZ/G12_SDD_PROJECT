@@ -154,6 +154,10 @@ public class PaintersViewBuilder {
             if (angle2 == 0) {
                 endAngle = 2 * Math.PI;
             }
+            else {
+                startAngle = angle2;
+                endAngle = angle1;
+            }
         }
         
         return new AngularSegment(startAngle, endAngle, segmentToProject);
