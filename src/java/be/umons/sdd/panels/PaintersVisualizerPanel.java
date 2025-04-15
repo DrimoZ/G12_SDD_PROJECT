@@ -14,6 +14,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Arc2D;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -141,27 +142,32 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
             double segStartDeg = Math.toDegrees(as.getStartAngle());
             double segEndDeg = Math.toDegrees(as.getEndAngle());
             
-
             double segExtentDeg = segEndDeg - segStartDeg;
 
             // Handle wrap-around if needed.
             if (segExtentDeg < 0) {
                 segExtentDeg += 360;
             }
+
+            Arc2D.Double arc = new Arc2D.Double(centerX - previewRadius, centerY - previewRadius,
+                                                previewRadius * 2, previewRadius * 2,
+                                                segStartDeg, segExtentDeg, Arc2D.OPEN);
             
             g2.setColor(Color.white);
             g2.setStroke(new BasicStroke(4));  // thick stroke on the circle line
-            g2.drawArc(centerX - previewRadius, centerY - previewRadius,
-                       previewRadius * 2, previewRadius * 2,
-                       (int) segStartDeg, (int) segExtentDeg);
+            // g2.drawArc(centerX - previewRadius, centerY - previewRadius,
+            //            previewRadius * 2, previewRadius * 2,
+            //            (int) segStartDeg, (int) segExtentDeg);
+            g2.draw(arc);
 
             // Draw the arc along the circle with the actual segment color.
             Color segmentColor = as.getSegment().getColor();
             g2.setColor(segmentColor);
             g2.setStroke(new BasicStroke(2));  // thick stroke on the circle line
-            g2.drawArc(centerX - previewRadius, centerY - previewRadius,
-                       previewRadius * 2, previewRadius * 2,
-                       (int) segStartDeg, (int) segExtentDeg);
+            // g2.drawArc(centerX - previewRadius, centerY - previewRadius,
+            //            previewRadius * 2, previewRadius * 2,
+            //            (int) segStartDeg, (int) segExtentDeg);
+            g2.draw(arc);
         }
 
         // DRAW ARC TO SHOW THE WHOLE VIEWING RANGE
