@@ -158,8 +158,8 @@ public class ObserverSelectorPanel extends JPanel implements SceneObserver {
         if (currentScene != null) {
             double extentX = currentScene.getExtentX();
             double extentY = currentScene.getExtentY();
-            spinnerX.setModel(new SpinnerNumberModel(position.x, -extentX, extentX, 1.0));
-            spinnerY.setModel(new SpinnerNumberModel(position.y, -extentY, extentY, 1.0));
+            spinnerX.setModel(new SpinnerNumberModel(position.x > extentX ? extentX : position.x, -extentX, extentX, 1.0));
+            spinnerY.setModel(new SpinnerNumberModel(position.y > extentY ? extentY : position.y, -extentY, extentY, 1.0));
         }
     }
 
