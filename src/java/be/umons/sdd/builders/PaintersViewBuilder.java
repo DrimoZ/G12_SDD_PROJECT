@@ -137,29 +137,38 @@ public class PaintersViewBuilder {
         Point2D segmentStart = segmentToProject.getStart();
         Point2D segmentEnd = segmentToProject.getEnd();
         
-        // Compute angles (in radians). Which is start or end does not matter ?
+        // Compute angles (in radians)
         double angle1 = Math.atan2(segmentStart.y - viewPoint.y, segmentStart.x - viewPoint.x);
         double angle2 = Math.atan2(segmentEnd.y - viewPoint.y, segmentEnd.x - viewPoint.x);
         
         // Normalize angles to [0, 2π)
         angle1 = (angle1 < 0) ? angle1 + 2 * Math.PI : angle1;
         angle2 = (angle2 < 0) ? angle2 + 2 * Math.PI : angle2;
-
+    
+        // Compute both the direct difference and the complementary difference
+        double directDiff = Math.abs(angle2 - angle1);
+        double complementDiff = 2 * Math.PI - directDiff;
         
-        // Determine start and end of the interval
-        double startAngle = angle1;
-        double endAngle = angle2;
+        double startAngle, endAngle;
         
-        if (angle2 < angle1) {
-            if (angle2 == 0) {
-                endAngle = 2 * Math.PI;
-            }
-            else {
+        // Choose the minimal angle interval
+        if (directDiff <= complementDiff) {
+            // No need to invert or normalize because the angles are already normalized ([0, 2π))
+            startAngle = Math.min(angle1, angle2);
+            endAngle = Math.max(angle1, angle2);
+        } else {
+            // Use the complementary interval for the minimal arc
+            // The startAngle will be the one that is "larger" (closer to 2π)
+            if (angle1 > angle2) {
+                startAngle = angle1;
+                endAngle = angle2 + 2 * Math.PI;
+            } else {
                 startAngle = angle2;
-                endAngle = angle1;
+                endAngle = angle1 + 2 * Math.PI;
             }
         }
         
         return new AngularSegment(startAngle, endAngle, segmentToProject);
     }
+    
 }

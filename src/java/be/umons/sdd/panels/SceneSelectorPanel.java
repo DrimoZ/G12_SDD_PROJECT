@@ -278,7 +278,5 @@ public class SceneSelectorPanel extends JPanel {
         for (SceneObserver observer : sceneObservers) {
             observer.onSceneSelected(selectedScene);
         }
-
-        System.out.println("Scene selected: " + selectedScene);
     }
 }

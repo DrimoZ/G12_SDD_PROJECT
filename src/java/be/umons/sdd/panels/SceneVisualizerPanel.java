@@ -25,10 +25,8 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver, Obs
     private BSPNode currentNode;
     private Scene2D currentScene;
     private Point2D observerPosition;
-    private double observerStartAngle;
-    private double observerEndAngle;
 
-    private boolean drawPartitionLine = false;
+    private final boolean drawPartitionLine = false;
 
     private Point2D cursorScenePosition = null;
 
@@ -297,8 +295,6 @@ public class SceneVisualizerPanel extends JPanel implements BSPNodeObserver, Obs
     @Override
     public void onObserverSelected(Point2D position, double startAngle, double endAngle) {
         observerPosition = position;
-        observerStartAngle = startAngle;
-        observerEndAngle = endAngle;
 
         repaint();
     }
