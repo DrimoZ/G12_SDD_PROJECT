@@ -29,7 +29,7 @@ public class TreeBuilderSelectorPanel extends JPanel {
     public List<TreeBuilderObserver> treeBuilderObservers = new ArrayList<>();
 
     private JComboBox<String> treeBuilderSelector;
-    private JSpinner tauValueSpinner; // Replaced JFormattedTextField with JSpinner
+    private JSpinner tauValueSpinner;
 
     private JPanel builderSelectorRow;
     private JPanel tellerTauValueRow;
@@ -88,8 +88,7 @@ public class TreeBuilderSelectorPanel extends JPanel {
         tellerTauValueRow.add(label2);
         
         // Create a SpinnerNumberModel with an initial value of 0.5,
-        // minimum value 1e-8 and maximum value 0.99999999 with a step of 0.01.
-        SpinnerNumberModel tauSpinnerModel = new SpinnerNumberModel(0.5, 1e-8, 0.99999999, 0.01);
+        SpinnerNumberModel tauSpinnerModel = new SpinnerNumberModel(0.5, 0.01, 0.99, 0.01);
         tauValueSpinner = new JSpinner(tauSpinnerModel);
         tauValueSpinner.setEnabled(false); // Disabled by default
         tauValueSpinner.setPreferredSize(new Dimension(150, 20));
