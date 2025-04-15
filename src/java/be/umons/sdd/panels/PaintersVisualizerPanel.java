@@ -137,7 +137,6 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
 
         // For each segment, compute its start and extent in degrees.
         // Assume AngularSegment angles are in radians with 0 at east.
-        // Convert them to degrees with 0 at top: (deg = Math.toDegrees(angle) - 90)
         for (AngularSegment as : angularSegments) {
             double segStartDeg = Math.toDegrees(as.getStartAngle());
             double segEndDeg = Math.toDegrees(as.getEndAngle());
@@ -149,10 +148,9 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
             if (segExtentDeg < 0) {
                 segExtentDeg += 360;
             }
-
             
             g2.setColor(Color.white);
-            g2.setStroke(new BasicStroke(6));  // thick stroke on the circle line
+            g2.setStroke(new BasicStroke(4));  // thick stroke on the circle line
             g2.drawArc(centerX - previewRadius, centerY - previewRadius,
                        previewRadius * 2, previewRadius * 2,
                        (int) segStartDeg, (int) segExtentDeg);
