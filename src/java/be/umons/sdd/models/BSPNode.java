@@ -60,17 +60,18 @@ public class BSPNode {
         return partition == null;
     }
 
+    
     /**
-     * Returns the number of objects in the subtree rooted at this node.
-     * For a leaf node, this is the number of objects stored in the node.
-     * For an internal node, this is the sum of the sizes of its left and right subtrees.
-     * @return the number of objects in the subtree
+     * Returns the number of nodes in the subtree rooted at this node.
+     * For a leaf node, the size is 1.
+     * For an internal node, the size is 1 plus the sum of the sizes of its left and right subtrees.
+     * @return the number of nodes in the subtree
      */
     public int size() {
         if (isLeaf()) {
-            return coplanarObjects.size();
+            return 1;
         } else {
-            return left.size() + right.size();
+            return 1 + left.size() + right.size();
         }
     }
 
