@@ -1,6 +1,8 @@
 package be.umons.sdd.test;
 
+import be.umons.sdd.builders.BSPTreeBuilder;
 import be.umons.sdd.builders.PaintersViewBuilder;
+import be.umons.sdd.builders.RandomBSPTreeBuilder;
 import be.umons.sdd.builders.TellerBSPTreeBuilder;
 import be.umons.sdd.enums.EScenes;
 import be.umons.sdd.enums.ETreeBuilder;
@@ -131,29 +133,35 @@ public class TestBSPTree {
         System.out.println("The process may take a few minutes...");
         System.out.println("");
 
-        return ETreeBuilder.getAllBuilders()
-        .parallelStream()
-        .map(builder -> {
-            // exactly the same code as before:
-            long buildStart = System.currentTimeMillis();
-            BSPNode root = builder.getBuilder().buildTree(scene.getSegments(), null);
-            long buildEnd   = System.currentTimeMillis();
+        List<BSPTreeBuilder> builders = ETreeBuilder.getAllBuilders().stream()
+            .map(action -> action.getBuilder())
+            .collect(Collectors.toList());
+        builders.add(new TellerBSPTreeBuilder(0.0000001));
+        builders.add(new TellerBSPTreeBuilder(0.9999999));
 
-            long paintStart = System.currentTimeMillis();
-            PaintersViewBuilder.paintersAlgorithm(root, new Point2D(0, 0));
-            long paintEnd   = System.currentTimeMillis();
+        return builders
+            .parallelStream()
+            .map(builder -> {
+                // exactly the same code as before:
+                long buildStart = System.currentTimeMillis();
+                BSPNode root = builder.buildTree(scene.getSegments(), null);
+                long buildEnd   = System.currentTimeMillis();
 
-            return new BSPMetrics(
-                (builder.getBuilder() instanceof TellerBSPTreeBuilder ? builder.getDisplayName() + " (Tau = " + new DecimalFormat("#.#########").format(((TellerBSPTreeBuilder) builder.getBuilder()).getTau()) + ")" : builder.getDisplayName()),
-                scene.getSegments().size(),
-                root.size(),
-                root.height(),
-                buildEnd - buildStart,
-                paintEnd - paintStart
-            );
-        })
-        .collect(Collectors.toList());
-    }
+                long paintStart = System.currentTimeMillis();
+                PaintersViewBuilder.paintersAlgorithm(root, new Point2D(0, 0));
+                long paintEnd   = System.currentTimeMillis();
+
+                return new BSPMetrics(
+                    (builder instanceof TellerBSPTreeBuilder ? "Teller (Tau = " + new DecimalFormat("#.#########").format(((TellerBSPTreeBuilder) builder).getTau()) + ")" : builder instanceof RandomBSPTreeBuilder ? "Random" : "Deterministic"),
+                    scene.getSegments().size(),
+                    root.size(),
+                    root.height(),
+                    buildEnd - buildStart,
+                    paintEnd - paintStart
+                );
+            })
+            .collect(Collectors.toList());
+        }
 
     /**
      * Prints a table of the results of testing all tree builders on a given scene.
