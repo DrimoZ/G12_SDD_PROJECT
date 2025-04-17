@@ -44,16 +44,20 @@ public abstract class BSPTreeBuilder {
             
             int countPositive = 0;
             int countNegative = 0;
+
             for (StraightSegment2D other : objects) {
                 Point2D center = other.getCenter();
                 double eval = candidateLine.evaluate(center);
+
                 if (eval > EPSILON) {
                     countPositive++;
                 } else if (eval < -EPSILON) {
                     countNegative++;
                 }
             }
+
             double balance = Math.abs(countPositive - countNegative);
+
             // Check free split condition.
             boolean freeSplit = false;
             if (parentLine != null) {
@@ -61,10 +65,13 @@ public abstract class BSPTreeBuilder {
                              Math.abs(parentLine.evaluate(obj.getRightEndpoint())) < EPSILON);
             }
             if (freeSplit) {
-                balance = -Double.MAX_VALUE; // Prioritize free splits.
+                // Prioritize free splits.
+                balance = -Double.MAX_VALUE; 
             }
+
             candidates.add(new Candidate(candidateLine, balance));
         }
+
         return candidates;
     }
     
@@ -103,13 +110,17 @@ public abstract class BSPTreeBuilder {
         for (StraightSegment2D obj : objects) {
             Point2D center = obj.getCenter();
             double eval = splittingLine.evaluate(center);
+
             if (Math.abs(eval) < EPSILON) {
                 coplanarList.add(obj);
-            } else if (eval > 0) {
+            } 
+            else if (eval > 0) {
                 double e1 = splittingLine.evaluate(obj.getLeftEndpoint());
                 double e2 = splittingLine.evaluate(obj.getRightEndpoint());
+
                 if (e1 * e2 < -EPSILON) {
                     StraightSegment2D[] fragments = obj.split(splittingLine);
+
                     if (fragments[0] != null) positiveList.add(fragments[0]);
                     if (fragments[1] != null) negativeList.add(fragments[1]);
                 } else {
@@ -118,8 +129,10 @@ public abstract class BSPTreeBuilder {
             } else { // eval < 0
                 double e1 = splittingLine.evaluate(obj.getLeftEndpoint());
                 double e2 = splittingLine.evaluate(obj.getRightEndpoint());
+
                 if (e1 * e2 < -EPSILON) {
                     StraightSegment2D[] fragments = obj.split(splittingLine);
+
                     if (fragments[1] != null) negativeList.add(fragments[1]);
                     if (fragments[0] != null) positiveList.add(fragments[0]);
                 } else {
