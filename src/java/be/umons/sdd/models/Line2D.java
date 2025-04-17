@@ -21,6 +21,8 @@ public class Line2D {
 
         double norm = Math.sqrt(A * A + B * B);
         if (norm == 0) {
+            System.out.println("[Line2D Constructor] Points must be distinct.");
+            System.out.println("p1: " + p1.toString() + ", p2: " + p2.toString());
             throw new IllegalArgumentException("[Line2D Constructor] Points must be distinct.");
         }
 

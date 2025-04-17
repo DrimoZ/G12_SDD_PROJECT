@@ -70,6 +70,8 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
             View360 view = PaintersViewBuilder.paintersAlgorithm(currentNode, observerPosition);
             // Draw the result.
             drawView360(g2, view);
+            // Draw the linear view.
+            drawLinearView(g2, view);
         } else {
             int width = getWidth() - 2 * 20;
             int height = getHeight() - 2 * 20;
@@ -173,14 +175,22 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
         // DRAW ARC TO SHOW THE WHOLE VIEWING RANGE
         g2.setColor(Color.LIGHT_GRAY);
         g2.setStroke(new BasicStroke(2));
-        g2.drawArc(centerX - 20, centerY - 20,
+        if (observerStartAngle <= observerEndAngle) {
+            g2.drawArc(centerX - 20, centerY - 20,
                     20 * 2, 20 * 2,
                 (int) observerStartAngle + 90, (int) (observerEndAngle  - observerStartAngle));
+        }
+        else {
+            g2.drawArc(centerX - 20, centerY - 20,
+                    20 * 2, 20 * 2,
+                (int) observerStartAngle + 90, (int) (360 - observerStartAngle + observerEndAngle));
+        }
         
         // DRAW OBSERVER'S VIEWING RANGE AS BLUE RADIAL LINES
         g2.setColor(Color.BLUE);
         g2.setStroke(new BasicStroke(2));
         int lineLength = previewRadius;
+
         // When observerStartAngle is 0, the blue line should be at the top.
         int xStart = centerX + (int)(lineLength * Math.cos(Math.toRadians(observerStartAngle + 90)));
         int yStart = centerY - (int)(lineLength * Math.sin(Math.toRadians(observerStartAngle + 90)));
@@ -189,6 +199,85 @@ public class PaintersVisualizerPanel extends JPanel implements BSPNodeObserver, 
         g2.drawLine(centerX, centerY, xStart, yStart);
         g2.drawLine(centerX, centerY, xEnd, yEnd);
     }
+
+    /**
+     * Draws the computed 360° view as a linear strip at the bottom of the panel.
+     * The strip shows the colored segments, with the observer's viewing range
+     * marked at the top with a blue "eye" and two lines down to the strip ends.
+     *
+     * @param g2 The Graphics2D context.
+     * @param view The View360 result from the Painter's algorithm.
+     */
+    private void drawLinearView(Graphics2D g2, View360 view) {
+        int panelW = getWidth();
+        int panelH = getHeight();
+
+        int stripH     = 10;
+        int bottomMarg = 80;
+        int stripY     = panelH - stripH - bottomMarg;
+        int sideMarg   = 50;
+        int stripX     = sideMarg;
+        int stripW     = panelW - 2 * sideMarg;
+
+        // DRAW BACKGROUND STRIP
+        g2.setColor(Color.LIGHT_GRAY);
+        g2.fillRect(stripX, stripY, stripW, stripH);
+
+        // The observer angles are in degrees with 0 on top (Need to normalize to [0..360]).
+        double obs0 = Math.toRadians(observerStartAngle + 90);
+        double obs1 = Math.toRadians(observerEndAngle   + 90);
+
+        // Compute the viewing range as [viewStart, viewEnd]
+        double fov = obs1 - obs0;
+        if (fov < 0) fov += 2*Math.PI;
+        
+        double viewStart = obs0;
+        double viewEnd = obs0 + fov;
+
+        // DRAW SEGMENTS
+        for (AngularSegment as : view.getAngularSegments()) {
+            double a0 = as.getStartAngle();
+            double a1 = as.getEndAngle();
+            if (a1 < a0) a1 += 2 * Math.PI;
+
+            // test the segment shifted by -2π, 0, +2π
+            for (double offset : new double[]{ -2*Math.PI, 0, 2*Math.PI }) {
+                double ds = a0 + offset;
+                double de = a1 + offset;
+
+                // compute overlap with [viewStart, viewEnd]
+                double vs = Math.max(ds, viewStart);
+                double ve = Math.min(de, viewEnd);
+                if (ve <= vs) continue;  // totally outside
+
+                // map [vs…ve] into fraction of FOV
+                double frac0 = (vs - viewStart) / fov;
+                double frac1 = (ve - viewStart) / fov;
+
+                int x0 = stripX + (int)(frac0 * stripW);
+                int x1 = stripX + (int)(frac1 * stripW);
+
+                g2.setColor(as.getSegment().getColor());
+                g2.fillRect(x0, stripY, x1 - x0, stripH);
+            }
+        }
+
+        // DRAW OBSERVER EYE
+        int eyeR = 6;
+        int eyeX = panelW / 2;
+        int eyeY = 40;
+
+        g2.setColor(Color.BLUE);
+        g2.fillOval(eyeX - eyeR, eyeY - eyeR, eyeR * 2, eyeR * 2);
+
+        g2.setStroke(new BasicStroke(1));
+        g2.setColor(new Color(0, 0, 255, 128));
+
+        // DRAW EYE LINES
+        g2.drawLine(eyeX, eyeY, stripX, stripY + stripH / 2);
+        g2.drawLine(eyeX, eyeY, stripX + stripW, stripY + stripH / 2);
+    }
+
 
     // Observers
     
