@@ -1,6 +1,7 @@
 package be.umons.sdd.test;
 
 import be.umons.sdd.builders.PaintersViewBuilder;
+import be.umons.sdd.builders.TellerBSPTreeBuilder;
 import be.umons.sdd.enums.EScenes;
 import be.umons.sdd.enums.ETreeBuilder;
 import be.umons.sdd.models.BSPNode;
@@ -8,6 +9,7 @@ import be.umons.sdd.models.Point2D;
 import be.umons.sdd.models.Scene2D;
 import be.umons.sdd.utils.SceneSerializer;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -142,7 +144,8 @@ public class TestBSPTree {
             long paintEnd   = System.currentTimeMillis();
 
             return new BSPMetrics(
-                builder.getDisplayName(),
+                (builder.getBuilder() instanceof TellerBSPTreeBuilder ? builder.getDisplayName() + " (Tau = " + new DecimalFormat("#.#########").format(((TellerBSPTreeBuilder) builder.getBuilder()).getTau()) + ")" : builder.getDisplayName()),
+                scene.getSegments().size(),
                 root.size(),
                 root.height(),
                 buildEnd - buildStart,
@@ -166,28 +169,38 @@ public class TestBSPTree {
         System.out.println("Painter Algorithm has been applied to all trees using an origin of (0, 0).");
         System.out.println("");
 
-        String format = "%-15s | %-10s | %-12s | %-12s | %-13s%n";
-        System.out.printf(format, "Heuristic", "Tree Size", "Tree Height", "Build Time", "Painter Time");
-        System.out.println("----------------+------------+--------------+--------------+---------------");
+        String format = "%-25s | %-10s | %-10s | %-12s | %-12s | %-13s%n";
+        System.out.printf(format, "Heuristic", "Segments", "Tree Size", "Tree Height", "Build Time", "Painter Time");
+        System.out.println("--------------------------+------------+------------+--------------+--------------+---------------");
 
         for (BSPMetrics m : results) {
-            System.out.printf(format, m.name, m.size, m.height, m.buildTimeMs + " ms", m.painterTimeMs + " ms");
+            System.out.printf(format, m.name, m.segmentCount, m.size, m.height, m.buildTimeMs + " ms", m.painterTimeMs + " ms");
         }
 
         System.out.println("");
         System.out.println("================================================================================================");
     }
 
-
+    /**
+     * A class to store the metrics of a BSP tree builder.
+     * 
+     * @param name the name of the builder
+     * @param size the size of the tree
+     * @param height the height of the tree
+     * @param buildTimeMs the time it took to build the tree
+     * @param painterTimeMs the time it took to paint the tree
+     */
     static class BSPMetrics {
         String name;
+        int segmentCount;
         int size;
         int height;
         long buildTimeMs;
         long painterTimeMs;
     
-        public BSPMetrics(String name, int size, int height, long buildTimeMs, long painterTimeMs) {
+        public BSPMetrics(String name, int segmentCount, int size, int height, long buildTimeMs, long painterTimeMs) {
             this.name = name;
+            this.segmentCount = segmentCount;
             this.size = size;
             this.height = height;
             this.buildTimeMs = buildTimeMs;
