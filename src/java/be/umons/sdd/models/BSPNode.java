@@ -59,6 +59,35 @@ public class BSPNode {
     public boolean isLeaf() {
         return partition == null;
     }
+
+    /**
+     * Returns the number of objects in the subtree rooted at this node.
+     * For a leaf node, this is the number of objects stored in the node.
+     * For an internal node, this is the sum of the sizes of its left and right subtrees.
+     * @return the number of objects in the subtree
+     */
+    public int size() {
+        if (isLeaf()) {
+            return coplanarObjects.size();
+        } else {
+            return left.size() + right.size();
+        }
+    }
+
+    /**
+     * Returns the height of the subtree rooted at this node.
+     * For a leaf node, the height is 0.
+     * For an internal node, the height is 1 plus the maximum of the heights
+     * of its left and right subtrees.
+     * @return the height of the subtree
+     */
+    public int height() {
+        if (isLeaf()) {
+            return 0;
+        } else {
+            return 1 + Math.max(left.height(), right.height());
+        }
+    }
     
     @Override
     public String toString() {

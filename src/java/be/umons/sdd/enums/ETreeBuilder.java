@@ -76,6 +76,21 @@ public enum ETreeBuilder {
     }
 
     /**
+     * Returns a list of all the BSP tree builders available, excluding the null one.
+     * 
+     * @return A list of BSPTreeBuilder instances.
+     */
+    public static List<ETreeBuilder> getAllBuilders() {
+        List<ETreeBuilder> builders = new ArrayList<>();
+        for (ETreeBuilder builder : values()) {
+            if (builder.builder == null) continue;
+            
+            builders.add(builder);
+        }
+        return builders;
+    }
+
+    /**
      * Retourne le nom affichable de la scène.
      *
      * @return Le nom affichable.

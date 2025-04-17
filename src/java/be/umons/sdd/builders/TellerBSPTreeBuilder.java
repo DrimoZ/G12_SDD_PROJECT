@@ -20,7 +20,7 @@ public class TellerBSPTreeBuilder extends BSPTreeBuilder {
      * @param tau the threshold value for sigma.
      */
     public TellerBSPTreeBuilder(double tau) {
-        this.tau = tau;
+        this.tau = tau < 0 ? 0 : tau > 1 ? 1 : tau;
     }
 
     /**
