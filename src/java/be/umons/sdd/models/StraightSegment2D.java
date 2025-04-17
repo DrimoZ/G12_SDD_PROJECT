@@ -21,12 +21,24 @@ public class StraightSegment2D {
      * @param color the color of the segment
      */
     public StraightSegment2D(Point2D start, Point2D end, Color color) {
+        if (start == null || end == null || color == null) {
+            throw new IllegalArgumentException("All parameters must be non-null.");
+        }
+
+        if (start.equals(end)) {
+            throw new IllegalArgumentException("Start and end points must be distinct.");
+        }
+
         this.start = start;
         this.end = end;
         this.color = color;
     }
 
     public StraightSegment2D(double x1, double y1, double x2, double y2, String colorName) {
+        if (x1 == x2 && y1 == y2) {
+            throw new IllegalArgumentException("Start and end points must be distinct.");
+        }
+
         this.start = new Point2D(x1, y1);
         this.end = new Point2D(x2, y2);
         this.color = ColorParser.getColor(colorName);
@@ -88,6 +100,11 @@ public class StraightSegment2D {
             segPositive = new StraightSegment2D(intersection, end, color);
             segNegative = new StraightSegment2D(start, intersection, color);
         }
+
+        // Remove degenerate segments.
+        if (segPositive.getStart().equals(segPositive.getEnd())) segPositive = null;
+        if (segNegative.getStart().equals(segNegative.getEnd())) segNegative = null;
+
         return new StraightSegment2D[] { segPositive, segNegative };
     }
     
