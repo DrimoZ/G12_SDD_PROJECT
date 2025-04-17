@@ -30,4 +30,22 @@ public class Point2D {
     public String toString() {
         return "(" + x + ", " + y + ")";
     }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        temp = Double.doubleToLongBits(x);
+        result = (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(y);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Point2D point2D = (Point2D) o;
+        return Double.compare(point2D.x, x) == 0 && Double.compare(point2D.y, y) == 0;
+    }
 }
