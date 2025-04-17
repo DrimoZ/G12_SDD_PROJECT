@@ -125,7 +125,6 @@ public class TestBSPTree {
      * @return a list of BSPMetrics objects, one for each builder
      */
     private static List<BSPMetrics> testAllBuilders(Scene2D scene) {
-        System.out.println("");
         System.out.println("Creating trees for all (" + ETreeBuilder.getAllBuilders().size() + ") builders and applying painters algorithm...");
         System.out.println("The process may take a few minutes...");
         System.out.println("");
